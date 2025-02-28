@@ -19,7 +19,6 @@ export const AuthContext = createContext({
     setSession: () => {},
 });
 
-// eslint-disable-next-line react/prop-types
 const AuthProvider = ({ children }) => {
     const [guestExpiryDate, setGuestExpiryDate] = useLocalStorage("guest_expiry_date",null);
     const navigate = useNavigate();

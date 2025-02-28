@@ -7,7 +7,6 @@ const useAuth = () => {
     return useContext(AuthContext);
 }
 
-// eslint-disable-next-line react/prop-types
 const ProtectedRoute = ({ children }) => {
     const { session, expiresAt, setGuestExpiry, setSession, getConfig, configs, setConfig} = useAuth();
     const location = useLocation();

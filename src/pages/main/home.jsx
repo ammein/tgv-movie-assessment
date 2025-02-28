@@ -24,7 +24,7 @@ function Home() {
             // noinspection JSIgnoredPromiseFromCall
             getConfigurations();
         }
-    },[configs, getConfig])
+    },[configs, getConfig, setConfig])
 
     return (
         <div className="h-screen w-screen grid grid-rows-2 auto-rows-fr gap-5 overflow-hidden">
