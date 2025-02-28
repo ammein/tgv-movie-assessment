@@ -9,12 +9,12 @@ const Show = () => {
     return (
         <div className="w-full !px-32 !py-20 flex flex-col gap-14">
             <Suspense fallback={<SkeletonMainSlider>
-                <div className="!p-[50px] rounded-xl border border-neutral-800 flex-col justify-start items-start gap-[100px] inline-flex flex-col justify-start items-start inline-flex">
+                <div className="!p-[50px] rounded-xl border border-neutral-800 gap-[100px] flex-col justify-start items-start inline-flex">
                     <Badge title={"Movies"}/>
                 </div>
             </SkeletonMainSlider>}>
                 <MainSlider allTrendingPromises={getTrending(trendingType['ALL'])} size={3} />
-                <div className="!p-[50px] rounded-xl border border-neutral-800 flex-col justify-start items-start gap-[100px] inline-flex flex-col justify-start items-start inline-flex">
+                <div className="!p-[50px] rounded-xl border border-neutral-800 gap-[100px] flex-col justify-start items-start inline-flex">
                     <Badge title={"Movies"}/>
                     <ItemSlider listType={"movie"} posterType={"group"} itemsPromise={getGenre("movie")} size={3} headline={"Our"} />
                 </div>
