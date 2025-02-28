@@ -1,42 +1,85 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+@import '@acab/reset.css';
+@import "tailwindcss";
+
+@theme{
+  /* COLORS */
+  --color-absolute-white: #ffffff;
+  --color-absolute-black: #000000;
+  --color-red-45: #e50000;
+  --color-red-50: #ff0000;
+  --color-red-55: #ff1a1a;
+  --color-red-60: #ff3333;
+  --color-red-80: #ff9999;
+  --color-red-90: #ffcccc;
+  --color-red-95: #ffe5e5;
+  --color-red-99: #fffafa;
+  --color-black-06: #0f0f0f;
+  --color-black-08: #141414;
+  --color-black-10: #1a1a1a;
+  --color-black-12: #1f1f1f;
+  --color-black-15: #262626;
+  --color-black-20: #333333;
+  --color-black-25: #404040;
+  --color-black-30: #4d4d4d;
+  --color-grey-60: #999999;
+  --color-color-grey-70: #b3b3b3;
+  --color-grey-75: #bfbfbf;
+  --color-grey-90: #e4e4e7;
+  --color-grey-95: #f1f1f3;
+  --color-grey-97: #f7f7f8;
+  --color-grey-99: #fcfcfd;
+  --font-manrope: "Mona Sans", serif;
+  --font-style: normal;
+  --font-optical-sizing: auto;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
+@layer components {
+  .typography {
+    .h1{
+      font-family: var(--font-manrope), ui-serif;
+      font-style: var(--font-style);
+      font-weight: 700;
+      font-optical-sizing: var(--font-optical-sizing);
+    }
+    .h2{
+      font-family: var(--font-manrope), ui-serif;
+      font-style: var(--font-style);
+      font-weight: 700;
+      font-optical-sizing: var(--font-optical-sizing);
+    }
+    .h3{
+      font-family: var(--font-manrope), ui-serif;
+      font-style: var(--font-style);
+      font-weight: 700;
+      font-optical-sizing: var(--font-optical-sizing);
+    }
+    .h4{
+      font-family: var(--font-manrope), ui-serif;
+      font-style: var(--font-style);
+      font-weight: 600;
+      font-optical-sizing: var(--font-optical-sizing);
+    }
+    .h5{
+      font-family: var(--font-manrope), ui-serif;
+      font-style: var(--font-style);
+      font-weight: 600;
+      font-optical-sizing: var(--font-optical-sizing);
+    }
+    .h6{
+      font-family: var(--font-manrope), ui-serif;
+      font-style: var(--font-style);
+      font-weight: 600;
+      font-optical-sizing: var(--font-optical-sizing);
+    }
+    .p{
+      font-family: var(--font-manrope), ui-serif;
+      font-style: var(--font-style);
+      font-weight: 400;
+      font-optical-sizing: var(--font-optical-sizing);
+    }
   }
-  to {
-    transform: rotate(360deg);
-  }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
+#root{
+  background-color: var(--color-black-06);
 }
