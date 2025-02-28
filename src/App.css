@@ -80,6 +80,10 @@
   }
 }
 
-#root{
+html, body{
   background-color: var(--color-black-06);
+}
+
+.swiper-pagination-progressbar-fill{
+  background-color: var(--color-red-45) !important;
 }

@@ -1,7 +1,6 @@
-import {useContext, Suspense} from "react";
+import {useContext, Suspense, useEffect} from "react";
 import { AuthContext } from '../../components'
-import {api_url, trendingType} from '../../utils/'
-import axios from 'axios'
+import {getTrending, trendingType} from '../../utils/'
 import Logo from '../../assets/StreamVibeLogo.svg?react'
 import PosterAttractions from "../../components/posters/poster-attractions.jsx";
 
@@ -11,19 +10,21 @@ const useAuth = () => {
 
 function Home() {
 
-    const { onGuestLogin, getConfig } = useAuth();
+    const { onGuestLogin } = useAuth();
 
-    const getTrending = async (type, time_window = "day", language = 'en-US') => {
-        return await axios.get(`${api_url}/trending/${type}/${time_window}`, {
-            headers: {
-                Accept: 'application/json',
-                Authorization: `Bearer ${import.meta.env.VITE_API_KEY_READ}`,
-            },
-            params: {
-                language: language
-            }
-        })
-    }
+    const { getConfig, configs, setConfig} = useAuth();
+
+    useEffect(  () => {
+        async function getConfigurations() {
+            let config = await getConfig();
+            setConfig(config);
+        }
+
+        if (!configs) {
+            // noinspection JSIgnoredPromiseFromCall
+            getConfigurations();
+        }
+    },[configs, getConfig])
 
     return (
         <div className="h-screen w-screen grid grid-rows-2 auto-rows-fr gap-5 overflow-hidden">
@@ -31,7 +32,7 @@ function Home() {
             <div>
                 <Suspense fallback={null}>
                     <PosterAttractions size={3} moviesPromise={getTrending(trendingType['MOVIES'])} peoplesPromise={getTrending(trendingType['PEOPLES'])}
-                                       tvPromise={getTrending(trendingType['TV'])} configsPromise={getConfig()}/>
+                                       tvPromise={getTrending(trendingType['TV'])}/>
                 </Suspense>
             </div>
             <div className="z-20 bottom-20 md:bottom-10 sm:bottom-5 fixed flex-col gap-[50px] justify-center items-center inline-flex">

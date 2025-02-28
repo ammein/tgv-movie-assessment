@@ -1,24 +1,32 @@
 import {createContext, useState} from "react";
-import {resolvePath, useNavigate} from "react-router";
+import {resolvePath, useLocation, useNavigate} from "react-router";
+import { useLocalStorage } from "@uidotdev/usehooks";
 import { api_url } from '../../utils/'
 import axios from "axios";
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const AuthContext = createContext({
     session: null,
+    expiresAt: null,
     token: null,
+    configs: null,
     onGuestLogin: () => {},
     onLogin: () => {},
     onLogout: () => {},
-    getConfig: () => {}
+    getConfig: () => {},
+    setConfig: () => {},
+    setGuestExpiry: () => {},
+    setSession: () => {},
 });
 
 // eslint-disable-next-line react/prop-types
 const AuthProvider = ({ children }) => {
+    const [guestExpiryDate, setGuestExpiryDate] = useLocalStorage("guest_expiry_date",null);
     const navigate = useNavigate();
-
-    const [sessionID, setSessionID] = useState(null);
-    const [requestToken, setRequestToken] = useState(null);
+    const location = useLocation();
+    const [sessionID, setSessionID] = useLocalStorage("session_id",null);
+    const [requestToken, setRequestToken] = useLocalStorage("request_token", null);
+    const [configs, setConfigs] = useState(null);
 
     const validate_guest_session = async (valid) => {
         if(!valid.data.success) throw new Error("API key not found or invalid");
@@ -33,11 +41,16 @@ const AuthProvider = ({ children }) => {
         if(!request.data.success) throw new Error("Invalid request for a session");
 
         setSessionID(request.data.guest_session_id);
+        setGuestExpiryDate(request.data.expires_at);
 
-        navigate('/show');
+        try{
+            await navigate('/show');
+        }catch{
+            throw new Error("Unable to navigate to show page");
+        }
     }
 
-    const validate_session = async (valid, redirect) => {
+    const validate_session = async (valid) => {
         if(!valid.data.success) throw new Error("API key not found or invalid");
 
         const request = await axios.get(`${api_url}/authentication/token/new`, {
@@ -51,8 +64,10 @@ const AuthProvider = ({ children }) => {
 
         setRequestToken(request.data.request_token);
 
+        const origin = location.state?.from?.pathname || '/show';
+
         try {
-            await navigate(`https://www.themoviedb.org/authenticate/${requestToken}?redirect_to=${resolvePath(redirect)}`);
+            await navigate(`https://www.themoviedb.org/authenticate/${requestToken}?redirect_to=${resolvePath(origin)}`);
             // eslint-disable-next-line no-unused-vars
         } catch (error) {
             throw new Error("Invalid request for a session");
@@ -69,13 +84,15 @@ const AuthProvider = ({ children }) => {
                 }
             });
 
+            if(sessionID) return await navigate('/show');
+
             await validate_guest_session(valid);
         } catch (err) {
             return console.error(err);
         }
     }
 
-    const login = async (redirect) => {
+    const login = async () => {
         try {
             const valid = await axios.get(`${api_url}/authentication`, {
                 headers: {
@@ -84,19 +101,24 @@ const AuthProvider = ({ children }) => {
                 }
             });
 
-            await validate_session(valid, redirect);
+            const origin = location.state?.from?.pathname || '/show';
+
+            if(sessionID) return await navigate(origin);
+
+            await validate_session(valid);
         } catch (err) {
             return console.error(err);
         }
     }
 
-    const logout = () => {
+    const logout = async () => {
         setSessionID(null);
         setRequestToken(null);
-        navigate("/");
+        setGuestExpiryDate(null);
+        await navigate("/");
     }
 
-    const config = async () => {
+    const getConfig = async () => {
         return await axios.get(`${api_url}/configuration`, {
             headers: {
                 Accept: "application/json",
@@ -108,10 +130,15 @@ const AuthProvider = ({ children }) => {
     const value = {
         session: sessionID,
         token: requestToken,
+        expiresAt: guestExpiryDate,
         onGuestLogin: guest_login,
         onLogin: login,
         onLogout: logout,
-        getConfig: config,
+        getConfig: getConfig,
+        setConfig: setConfigs,
+        configs: configs,
+        setGuestExpiry: setGuestExpiryDate,
+        setSession: setSessionID,
     }
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
