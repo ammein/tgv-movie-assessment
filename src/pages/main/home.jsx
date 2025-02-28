@@ -53,7 +53,7 @@ function Home() {
                     </p>
                 </div>
                 <button
-                    className="!h-fit !w-fit !px-6 !py-[18px] !bg-red-45 !rounded-lg !justify-start !items-center !gap-1 !inline-flex"
+                    className="!h-fit !w-fit !px-6 !py-[18px] !bg-red-45 !rounded-lg !justify-start !items-center !gap-1 !inline-flex cursor-pointer"
                     onClick={onGuestLogin}>
                     <div className="relative">
                         <svg width="29" height="28" viewBox="0 0 29 28" fill="none" xmlns="http://www.w3.org/2000/svg">

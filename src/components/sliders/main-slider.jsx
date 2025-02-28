@@ -30,11 +30,11 @@ export const SwiperButton = ({reference, direction, children}) => {
     switch (direction) {
         case 'left':
             return <button
-                className="!p-5 !border !border-neutral-800 !bg-black-06 !rounded-xl swiper-button-prev !gap-2"
+                className="!p-5 !border !border-neutral-800 !bg-black-06 !rounded-xl swiper-button-prev !gap-2 cursor-pointer"
                 onClick={() => swiper ? swiper.slidePrev() : reference.current.slidePrev()}><LeftArrow/>{children}</button>
         case 'right':
             return <button
-                className="!p-5 !border !border-neutral-800 !bg-black-06 !rounded-xl swiper-button-next !gap-2"
+                className="!p-5 !border !border-neutral-800 !bg-black-06 !rounded-xl swiper-button-next !gap-2 cursor-pointer"
                 onClick={() => swiper ? swiper.slideNext() : reference.current.slideNext()}><RightArrow/>{children}</button>
     }
 }
@@ -60,7 +60,7 @@ export const SkeletonMainSlider = ({children}) => (
                         </div>
                         <div className="h-14 justify-start items-start gap-5 inline-flex">
                             <button
-                                className="!h-fit !w-fit !px-6 !py-[18px] bg-red-45 !rounded-lg !justify-start !items-center !gap-1 !inline-flex">
+                                className="!h-fit !w-fit !px-6 !py-[18px] bg-red-45 !rounded-lg !justify-start !items-center !gap-1 !inline-flex cursor-not-allowed">
                                 <Skeleton/>
                                 <span className="text-white text-lg font-semibold font-manrope leading-7"><Skeleton
                                     enableAnimation={true}/>
@@ -99,7 +99,7 @@ const MainSlider = ({allTrendingPromises, size}) => {
                     delay: 3000,
                 }}
             >
-                {configs && allTrending && allTrending.data.results.map((trending, i) => (
+                {configs && allTrending && allTrending.data.map((trending, i) => (
                     <SwiperSlide key={i} style={{
                         backgroundImage: `url(${configs.data.images.base_url + configs.data.images.backdrop_sizes[size] + trending.backdrop_path})`
                     }} className={`relative w-full h-full bg-cover pb-5`}>
@@ -112,11 +112,11 @@ const MainSlider = ({allTrendingPromises, size}) => {
                                 <h1
                                     className=" text-center text-white text-[38px] font-bold font-manrope leading-[57px]">{trending.name || trending.original_title || trending.title}</h1>
                                 <p
-                                    className="text-center text-grey-60 text-lg font-medium font-manrope leading-[27px]">{trending.overview}</p>
+                                    className="sm:block hidden text-center text-grey-60 text-lg font-medium font-manrope leading-[27px]">{trending.overview}</p>
                             </div>
                             <div className="h-14 justify-start items-start gap-5 inline-flex">
                                 <button
-                                    className="!h-fit !w-fit !px-6 !py-[18px] !bg-red-45 !rounded-lg !justify-start !items-center !gap-1 !inline-flex">
+                                    className="!h-fit !w-fit !px-6 !py-[18px] !bg-red-45 !rounded-lg !justify-start !items-center !gap-1 !inline-flex cursor-pointer">
                                     <Play/>
                                     <div className="text-white text-lg font-semibold font-manrope leading-7">Play Now
                                     </div>

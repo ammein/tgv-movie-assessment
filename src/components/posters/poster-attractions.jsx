@@ -13,7 +13,7 @@ const PosterAttractions = ({ moviesPromise, peoplesPromise, tvPromise, size }) =
     const tv = use(tvPromise);
     const { configs } = useAuth()
 
-    const posterClass = "h-auto max-w-full sm:h-36 aspect-2/3 rounded-xl";
+    const posterClass = "max-w-full h-full rounded-xl object-cover aspect-2/3";
 
     const poster = (key, item) => {
         if(item.poster_path) {
@@ -25,9 +25,9 @@ const PosterAttractions = ({ moviesPromise, peoplesPromise, tvPromise, size }) =
 
     return (
         <div className="grid lg:grid-cols-9 md:grid-cols-5 sm:grid-cols-3 grid-cols-2 grid-flow-row gap-5 w-full h-auto">
-            {configs && movies && movies.data.results.map((movie, i) => poster(i, movie))}
-            {configs && tv && tv.data.results.map((eachTV, i) => poster(i, eachTV))}
-            {configs && peoples && peoples.data.results.map((people, i) => poster(i, people))}
+            {configs && movies && movies.data.map((movie, i) => poster(i, movie))}
+            {configs && tv && tv.data.map((eachTV, i) => poster(i, eachTV))}
+            {configs && peoples && peoples.data.map((people, i) => poster(i, people))}
         </div>
     )
 }

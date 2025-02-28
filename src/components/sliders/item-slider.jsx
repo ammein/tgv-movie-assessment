@@ -14,9 +14,20 @@ const useAuth = () => {
     return useContext(AuthContext);
 }
 
-const ItemSlider = ({listType, posterType, headline, itemsPromise, size}) => {
+/**
+ *
+ * @param {"movie" | "tv"} listType
+ * @param {"group" | "individual"} posterType
+ * @param {Object | undefined} options - API Options. See: https://developer.themoviedb.org/reference/discover-movie
+ * @param {string} headline
+ * @param {Promise<import('axios').AxiosResponse<*>>} itemsPromise
+ * @param {number} size
+ * @returns {JSX.Element}
+ * @constructor
+ */
+const ItemSlider = ({listType, posterType, options, headline, itemsPromise, size}) => {
     const items = use(itemsPromise);
-    const swiperRef = useRef(undefined);
+    const swiperRef = useRef(null);
 
     const type = useRef("");
 
@@ -50,14 +61,31 @@ const ItemSlider = ({listType, posterType, headline, itemsPromise, size}) => {
                     el: ".swiper-pagination", // Use a valid DOM element here
                     type: "fraction",
                 }}
+                breakpoints={{
+                    400: {
+                        spaceBetween: 0,
+                        slidesPerView: 1,
+                    },
+                    576: {
+                        spaceBetween: 5,
+                        slidesPerView: 2,
+                    },
+                    768: {
+                        spaceBetween: 20,
+                        slidesPerView: 3,
+                    },
+                    1044: {
+                        slidesPerView: 5,
+                    }
+                }}
             >
-                {configs && items && Object.values(items.data)[0].map((item, i) => {
+                {configs && items && items.data && items.data.map((item, i) => {
                     let title = item.name || item.original_title || item.title;
-                    type.current = " " + Object.keys(items.data)[0];
+                    type.current = " " + items.title;
 
                     return (
                         <SwiperSlide key={i}>
-                            <PosterItem listType={listType} type={posterType} id={item.id} title={title} item={item}
+                            <PosterItem listType={listType} type={posterType} id={item.id} options={options} title={title} item={item}
                                         size={size}/>
                         </SwiperSlide>
                     )

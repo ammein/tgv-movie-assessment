@@ -1,8 +1,7 @@
 import {createContext, useState} from "react";
-import {resolvePath, useLocation, useNavigate} from "react-router";
+import {useLocation, useNavigate} from "react-router";
 import { useLocalStorage } from "@uidotdev/usehooks";
-import { api_url } from '../../utils/'
-import axios from "axios";
+import {instanceAxios, isNotExpired} from '../../utils/'
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const AuthContext = createContext({
@@ -17,20 +16,22 @@ export const AuthContext = createContext({
     setConfig: () => {},
     setGuestExpiry: () => {},
     setSession: () => {},
+    getSession: () => {},
+    setRequestToken: () => {},
 });
 
 const AuthProvider = ({ children }) => {
-    const [guestExpiryDate, setGuestExpiryDate] = useLocalStorage("guest_expiry_date",null);
+    const [guestExpiryDate, setGuestExpiryDate] = useLocalStorage("guest_expiry_date");
     const navigate = useNavigate();
     const location = useLocation();
-    const [sessionID, setSessionID] = useLocalStorage("session_id",null);
-    const [requestToken, setRequestToken] = useLocalStorage("request_token", null);
+    const [sessionID, setSessionID] = useLocalStorage("session_id");
+    const [requestToken, setRequestToken] = useLocalStorage("request_token");
     const [configs, setConfigs] = useState(null);
 
     const validate_guest_session = async (valid) => {
         if(!valid.data.success) throw new Error("API key not found or invalid");
 
-        const request = await axios.get(`${api_url}/authentication/guest_session/new`, {
+        const request = await instanceAxios.get(`/authentication/guest_session/new`, {
             headers: {
                 Accept: "application/json",
                 Authorization: `Bearer ${import.meta.env.VITE_API_KEY_READ}`
@@ -49,10 +50,67 @@ const AuthProvider = ({ children }) => {
         }
     }
 
-    const validate_session = async (valid) => {
+    const validate_session = async (request_token) => {
+        const request = await instanceAxios.post(`authentication/session/new`, {
+            request_token: request_token,
+        }, {
+            headers: {
+                Accept: "application/json",
+                'content-type': 'application/json',
+                Authorization: `Bearer ${import.meta.env.VITE_API_KEY_READ}`
+            },
+            params: {
+                api_key: import.meta.env.VITE_API_KEY,
+            }
+        })
+
+        if(!request.data.success) throw new Error("Invalid request for a session");
+
+        setSessionID(request.data.session_id);
+
+        navigate('/show');
+    }
+
+    const remove_session = async (guest) => {
+        if(guest){
+            window.localStorage.clear();
+            setSessionID(null);
+            setRequestToken(null);
+            setGuestExpiryDate(null);
+        } else {
+            const request = await instanceAxios.delete(`/authentication/session`, {
+                headers: {
+                    Accept: "application/json",
+                    'content-type': 'application/json',
+                    Authorization: `Bearer ${import.meta.env.VITE_API_KEY_READ}`
+                },
+                data: {
+                    session_id: sessionID,
+                },
+                params: {
+                    api_key: import.meta.env.VITE_API_KEY
+                }
+            });
+
+            if(!request.data.success) throw new Error("Unable to delete the session");
+
+            window.localStorage.clear();
+            setSessionID(null);
+            setRequestToken(null);
+            setGuestExpiryDate(null);
+
+            try{
+                await navigate('/');
+            }catch{
+                throw new Error("Unable to navigate to home page");
+            }
+        }
+    }
+
+    const get_request_token = async (valid) => {
         if(!valid.data.success) throw new Error("API key not found or invalid");
 
-        const request = await axios.get(`${api_url}/authentication/token/new`, {
+        const request = await instanceAxios.get(`/authentication/token/new`, {
             headers: {
                 Accept: "application/json",
                 Authorization: `Bearer ${import.meta.env.VITE_API_KEY_READ}`
@@ -63,27 +121,21 @@ const AuthProvider = ({ children }) => {
 
         setRequestToken(request.data.request_token);
 
-        const origin = location.state?.from?.pathname || '/show';
+        const origin = location.state?.from?.pathname && location.state?.from?.pathname !== '/' ? location.state?.from?.pathname : '/show';
 
-        try {
-            await navigate(`https://www.themoviedb.org/authenticate/${requestToken}?redirect_to=${resolvePath(origin)}`);
-            // eslint-disable-next-line no-unused-vars
-        } catch (error) {
-            throw new Error("Invalid request for a session");
-        }
-
+        window.location.href = `https://www.themoviedb.org/authenticate/${request.data.request_token}?redirect_to=${window.location.origin + origin}`;
     }
 
     const guest_login = async () => {
         try {
-            const valid = await axios.get(`${api_url}/authentication`, {
+            const valid = await instanceAxios.get(`/authentication`, {
                 headers: {
                     Accept: "application/json",
                     Authorization: `Bearer ${import.meta.env.VITE_API_KEY_READ}`
                 }
             });
 
-            if(sessionID) return await navigate('/show');
+            if(sessionID && isNotExpired(guestExpiryDate) || requestToken) return await navigate('/show');
 
             await validate_guest_session(valid);
         } catch (err) {
@@ -93,32 +145,33 @@ const AuthProvider = ({ children }) => {
 
     const login = async () => {
         try {
-            const valid = await axios.get(`${api_url}/authentication`, {
+            const valid = await instanceAxios.get(`/authentication`, {
                 headers: {
                     Accept: "application/json",
                     Authorization: `Bearer ${import.meta.env.VITE_API_KEY_READ}`
                 }
             });
 
-            const origin = location.state?.from?.pathname || '/show';
+            const origin = location.state?.from?.pathname !== '/' ? location.state?.from?.pathname : '/show';
 
             if(sessionID) return await navigate(origin);
 
-            await validate_session(valid);
+            await get_request_token(valid);
         } catch (err) {
             return console.error(err);
         }
     }
 
-    const logout = async () => {
-        setSessionID(null);
-        setRequestToken(null);
-        setGuestExpiryDate(null);
-        await navigate("/");
+    const logout = async (guest = false) => {
+        try{
+            await remove_session(guest);
+        } catch (err) {
+            return console.error(err);
+        }
     }
 
     const getConfig = async () => {
-        return await axios.get(`${api_url}/configuration`, {
+        return await instanceAxios.get(`/configuration`, {
             headers: {
                 Accept: "application/json",
                 Authorization: `Bearer ${import.meta.env.VITE_API_KEY_READ}`
@@ -134,10 +187,12 @@ const AuthProvider = ({ children }) => {
         onLogin: login,
         onLogout: logout,
         getConfig: getConfig,
+        getSession: validate_session,
         setConfig: setConfigs,
         configs: configs,
         setGuestExpiry: setGuestExpiryDate,
         setSession: setSessionID,
+        setRequestToken: setRequestToken,
     }
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
