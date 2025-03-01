@@ -1,4 +1,4 @@
-import {useContext, useEffect} from "react";
+import {useContext, useEffect, useRef} from "react";
 import {AuthContext} from "./auth-provider.jsx";
 import {Navigate, useLocation, useSearchParams} from "react-router";
 import {isNotExpired} from "../../utils/index.jsx";
@@ -11,23 +11,42 @@ const ProtectedRoute = ({ children }) => {
     const { session, expiresAt, setGuestExpiry, setSession, getConfig, configs, setConfig, token, setRequestToken, getSession} = useAuth();
     const location = useLocation();
     const [searchParams] = useSearchParams();
+    const isMounted = useRef(false);
 
-    useEffect(  () => {
-        async function getConfigurations() {
-            let config = await getConfig();
-            setConfig(config);
+    useEffect(() => {
+        let isSubscribed = true;
+
+        // To let it not run twice when initialized: https://www.reddit.com/r/reactjs/comments/15s1p0q/comment/jwbsd7x/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button
+        if (!isMounted.current) {
+            const getConfigurations = async () => {
+                let config = await getConfig();
+
+                if(searchParams.size > 0 && searchParams.has("approved") && JSON.parse(searchParams.get("approved"))) {
+                    if(isSubscribed) {
+                        setRequestToken(searchParams.get("request_token"));
+                    }
+                    if(!session){
+                        await getSession(searchParams.get("request_token"));
+                    }
+                }
+
+                // Set once when not subscribed
+                if(!isSubscribed) {
+                    setConfig(config);
+                }
+            }
+
+            if(!configs) {
+                getConfigurations()
+                    .catch(console.error)
+            }
+
+            // Set it to true to let the function execution above only run once
+            isMounted.current = true;
         }
 
-        if (!configs) {
-            // noinspection JSIgnoredPromiseFromCall
-            getConfigurations();
-        }
-
-        if(searchParams.size > 0 && searchParams.has("approved") && JSON.parse(searchParams.get("approved"))) {
-            setRequestToken(searchParams.get("request_token"));
-            getSession(searchParams.get("request_token"));
-        }
-    },[configs, getConfig, searchParams, setConfig, setRequestToken, location, getSession])
+        return () => isSubscribed = false
+    },[])
 
     if (session && expiresAt && !isNotExpired(expiresAt)) {
         setGuestExpiry(null);

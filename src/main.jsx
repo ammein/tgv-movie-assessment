@@ -4,13 +4,16 @@ import App from './App.jsx'
 import { BrowserRouter } from 'react-router';
 import Navbar from "./components/generic/navbar.jsx";
 import AuthProvider from './components/authentication/auth-provider.jsx';
+import ErrorBoundary from './components/hoc/error-boundary.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
       <BrowserRouter>
           <AuthProvider>
-            <Navbar />
-            <App />
+              <ErrorBoundary>
+                <Navbar />
+                <App />
+              </ErrorBoundary>
           </AuthProvider>
       </BrowserRouter>
   </StrictMode>,

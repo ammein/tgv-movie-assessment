@@ -1,42 +1,16 @@
-// noinspection JSValidateTypes
-
 import Play from '../../assets/play.svg?react'
-import {Swiper, SwiperSlide, useSwiper} from 'swiper/react';
-import {Pagination, Navigation, Autoplay} from 'swiper/modules'
+import {Swiper, SwiperSlide} from 'swiper/react';
+import {Autoplay, Navigation, Pagination} from 'swiper/modules'
 import 'swiper/css';
 import 'swiper/css/pagination';
-import LeftArrow from '../../assets/left-arrow.svg?react'
-import RightArrow from '../../assets/right-arrow.svg?react'
-import {use, useContext} from "react";
+import {use, useContext, useRef} from "react";
 import {AuthContext} from "../authentication/index.jsx";
 import Skeleton, {SkeletonTheme} from "react-loading-skeleton";
+import {SwiperButton} from "./swiper-button.jsx";
 
 
 const useAuth = () => {
     return useContext(AuthContext);
-}
-
-/**
- *
- * @param {"left" || "right"} direction
- * @param {import('react').RefObject} reference
- * @param {JSX.Element} children
- * @returns {JSX.Element}
- * @constructor
- */
-export const SwiperButton = ({reference, direction, children}) => {
-    const swiper = useSwiper();
-
-    switch (direction) {
-        case 'left':
-            return <button
-                className="!p-5 !border !border-neutral-800 !bg-black-06 !rounded-xl swiper-button-prev !gap-2 cursor-pointer"
-                onClick={() => swiper ? swiper.slidePrev() : reference.current.slidePrev()}><LeftArrow/>{children}</button>
-        case 'right':
-            return <button
-                className="!p-5 !border !border-neutral-800 !bg-black-06 !rounded-xl swiper-button-next !gap-2 cursor-pointer"
-                onClick={() => swiper ? swiper.slideNext() : reference.current.slideNext()}><RightArrow/>{children}</button>
-    }
 }
 
 export const SkeletonMainSlider = ({children}) => (
@@ -77,6 +51,7 @@ export const SkeletonMainSlider = ({children}) => (
 
 const MainSlider = ({allTrendingPromises, size}) => {
     const allTrending = use(allTrendingPromises);
+    const swiperRef = useRef();
 
     const {configs} = useAuth();
 
@@ -86,9 +61,8 @@ const MainSlider = ({allTrendingPromises, size}) => {
                 className="w-full h-[80vh] relative rounded-2xl overflow-hidden !border-t !border-l !border-r !border-neutral-800 px-[50px] pt-[50px]"
                 slidesPerView={1}
                 modules={[Navigation, Pagination, Autoplay]}
-                navigation={{
-                    nextEl: '.swiper-button-next',
-                    prevEl: '.swiper-button-prev',
+                onSwiper={(swiper)=> {
+                    swiperRef.current = swiper
                 }}
                 pagination={{
                     el: ".swiper-pagination", // Use a valid DOM element here
@@ -128,8 +102,8 @@ const MainSlider = ({allTrendingPromises, size}) => {
 
                 <div
                     className="z-10 !px-10 absolute bottom-5 left-0 w-full h-14 rounded-xl justify-between items-center inline-flex">
-                    <SwiperButton direction={"left"}/>
-                    <SwiperButton direction={"right"}/>
+                    <SwiperButton reference={swiperRef} direction={"left"}/>
+                    <SwiperButton reference={swiperRef} direction={"right"}/>
                 </div>
                 <div className="swiper-pagination"></div>
             </Swiper>

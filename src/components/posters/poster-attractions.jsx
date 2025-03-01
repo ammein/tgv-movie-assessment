@@ -1,4 +1,4 @@
-
+import { LazyLoadImage } from 'react-lazy-load-image-component';
 import {use, useContext} from "react";
 import {AuthContext} from "../authentication/index.jsx";
 
@@ -17,7 +17,7 @@ const PosterAttractions = ({ moviesPromise, peoplesPromise, tvPromise, size }) =
 
     const poster = (key, item) => {
         if(item.poster_path) {
-            return <img key={key} src={configs.data.images.base_url + configs.data.images.poster_sizes[size] + item.poster_path} alt={item.name} className={posterClass}/>
+            return <LazyLoadImage key={key} src={configs.data.images.base_url + configs.data.images.poster_sizes[size] + item.poster_path} alt={item.name} className={posterClass}/>
         } else {
             return <div key={key} className={posterClass + " bg-black-08 text-center align-middle items-center justify-center flex-col inline-flex text-absolute-white font-manrope"}>{item.name}</div>
         }

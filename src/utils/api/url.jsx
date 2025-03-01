@@ -1,17 +1,26 @@
-import axios from "axios";
-
-export const api_url = import.meta.env.VITE_API_URL + '/' + import.meta.env.VITE_API_VERSION;
+import Axios from "axios";
+import { setupCache } from 'axios-cache-interceptor';
 
 const config = {
-    headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Content-Type": "text/plain",
-    },
+    baseURL: window.location.origin + '/api',
 };
-export const instanceAxios = axios.create({
-    baseURL: api_url,
-    https: config,
-});
+
+export const instanceAxios = Axios.create(config);
+
+export const axios = setupCache(instanceAxios);
+
+// Axios Debugging
+if(import.meta.env.MODE === "development"){
+    axios.interceptors.request.use(request => {
+        // console.log('Starting Request', JSON.stringify(request, null, 2))
+        return request
+    })
+
+    axios.interceptors.response.use(response => {
+        // console.log('Response:', JSON.stringify(response, null, 2))
+        return response
+    })
+}
 
 /**
  * Get Trending Lists
@@ -21,7 +30,7 @@ export const instanceAxios = axios.create({
  * @returns {Promise<axios.AxiosResponse<any>>}
  */
 export const getTrending = async (type, time_window = "day", language = 'en-US') => {
-    return await instanceAxios.get(`/trending/${type}/${time_window}`, {
+    return await axios.get(`/trending/${type}/${time_window}`, {
         params: {
             language: language,
             api_key: import.meta.env.VITE_API_KEY,
@@ -41,7 +50,7 @@ export const getTrending = async (type, time_window = "day", language = 'en-US')
  * @returns {Promise<axios.AxiosResponse<any>>}
  */
 export const getGenre = async (type, language = 'en') => {
-    return await instanceAxios.get(`/genre/${type}/list`, {
+    return await axios.get(`/genre/${type}/list`, {
         params: {
             language: language,
             api_key: import.meta.env.VITE_API_KEY,
@@ -63,7 +72,7 @@ export const getGenre = async (type, language = 'en') => {
  * @returns {Promise<axios.AxiosResponse<any>>}
  */
 export const getListDetails = async (type, options, page = 1, language = 'en-US') => {
-    return await instanceAxios.get(`/discover/${type}`, {
+    return await axios.get(`/discover/${type}`, {
         params: {
             ...options,
             language,
@@ -81,7 +90,7 @@ export const getListDetails = async (type, options, page = 1, language = 'en-US'
  * @returns {Promise<axios.AxiosResponse<any>>}
  */
 export const getImages = async (type, id, options) => {
-    return await instanceAxios.get(`/${type}/${id}/images`, {
+    return await axios.get(`/${type}/${id}/images`, {
         params: {
             ...options,
             api_key: import.meta.env.VITE_API_KEY,
@@ -98,7 +107,7 @@ export const getImages = async (type, id, options) => {
  * @returns {Promise<axios.AxiosResponse<any>>}
  */
 export const getDetail = async (type, id, language = 'en-US') => {
-    return await instanceAxios.get(`/${type}/${id}`, {
+    return await axios.get(`/${type}/${id}`, {
         params: {
             language,
             api_key: import.meta.env.VITE_API_KEY,
@@ -113,7 +122,7 @@ export const getDetail = async (type, id, language = 'en-US') => {
  * @returns {Promise<axios.AxiosResponse<any>>}
  */
 export const getMovieUpcoming = async (page = 1,language = 'en-US') => {
-    return await instanceAxios.get(`/movie/upcoming`, {
+    return await axios.get(`/movie/upcoming`, {
         params: {
             language,
             page,

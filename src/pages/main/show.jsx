@@ -1,5 +1,5 @@
 import MainSlider, { SkeletonMainSlider } from "../../components/sliders/main-slider.jsx";
-import {getGenre, getTrending, trendingType} from '../../utils'
+import {getGenre, getTrending, trendingType, getMovieUpcoming} from '../../utils'
 import {Suspense} from "react";
 import Badge from "../../components/badge/badge.jsx";
 import ItemSlider from "../../components/sliders/item-slider.jsx";
@@ -25,7 +25,7 @@ const Show = () => {
                     <ItemSlider listType={"movie"} posterType={"individual"} itemsPromise={getTrending(trendingType['MOVIES'])} options={{
                         include_image_language: "en"
                     }} size={3} headline={"Popular Top 10 in"} />
-                    {/*<ItemSlider listType={"movie"} posterType={"individual"} itemsPromise={getMovieUpcoming()} size={0} headline={"Upcoming"} />*/}
+                    <ItemSlider listType={"movie"} posterType={"individual"} itemsPromise={getMovieUpcoming()} size={0} headline={"Upcoming"} />
                 </div>
                 <div className="sm:p-[50px] p-[20px] rounded-xl border border-neutral-800 gap-[100px] flex-col justify-start items-start inline-flex">
                     <Badge title={"Shows"}/>

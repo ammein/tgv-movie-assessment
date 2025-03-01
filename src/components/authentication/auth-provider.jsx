@@ -1,7 +1,7 @@
-import {createContext, useState} from "react";
+import {createContext, useCallback, useState} from "react";
 import {useLocation, useNavigate} from "react-router";
 import { useLocalStorage } from "@uidotdev/usehooks";
-import {instanceAxios, isNotExpired} from '../../utils/'
+import {axios, isNotExpired} from '../../utils/'
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const AuthContext = createContext({
@@ -28,10 +28,10 @@ const AuthProvider = ({ children }) => {
     const [requestToken, setRequestToken] = useLocalStorage("request_token");
     const [configs, setConfigs] = useState(null);
 
-    const validate_guest_session = async (valid) => {
+    const validate_guest_session = useCallback(async (valid) => {
         if(!valid.data.success) throw new Error("API key not found or invalid");
 
-        const request = await instanceAxios.get(`/authentication/guest_session/new`, {
+        const request = await axios.get(`/authentication/guest_session/new`, {
             headers: {
                 Accept: "application/json",
                 Authorization: `Bearer ${import.meta.env.VITE_API_KEY_READ}`
@@ -48,10 +48,10 @@ const AuthProvider = ({ children }) => {
         }catch{
             throw new Error("Unable to navigate to show page");
         }
-    }
+    }, [])
 
-    const validate_session = async (request_token) => {
-        const request = await instanceAxios.post(`authentication/session/new`, {
+    const validate_session = useCallback(async (request_token) => {
+        const request = await axios.post(`authentication/session/new`, {
             request_token: request_token,
         }, {
             headers: {
@@ -69,16 +69,17 @@ const AuthProvider = ({ children }) => {
         setSessionID(request.data.session_id);
 
         navigate('/show');
-    }
+    }, [])
 
-    const remove_session = async (guest) => {
+
+    const remove_session = useCallback(async (guest) => {
         if(guest){
             window.localStorage.clear();
             setSessionID(null);
             setRequestToken(null);
             setGuestExpiryDate(null);
         } else {
-            const request = await instanceAxios.delete(`/authentication/session`, {
+            const request = await axios.delete(`/authentication/session`, {
                 headers: {
                     Accept: "application/json",
                     'content-type': 'application/json',
@@ -105,12 +106,12 @@ const AuthProvider = ({ children }) => {
                 throw new Error("Unable to navigate to home page");
             }
         }
-    }
+    }, [sessionID])
 
-    const get_request_token = async (valid) => {
+    const get_request_token = useCallback(async (valid) => {
         if(!valid.data.success) throw new Error("API key not found or invalid");
 
-        const request = await instanceAxios.get(`/authentication/token/new`, {
+        const request = await axios.get(`/authentication/token/new`, {
             headers: {
                 Accept: "application/json",
                 Authorization: `Bearer ${import.meta.env.VITE_API_KEY_READ}`
@@ -124,11 +125,11 @@ const AuthProvider = ({ children }) => {
         const origin = location.state?.from?.pathname && location.state?.from?.pathname !== '/' ? location.state?.from?.pathname : '/show';
 
         window.location.href = `https://www.themoviedb.org/authenticate/${request.data.request_token}?redirect_to=${window.location.origin + origin}`;
-    }
+    }, [location.state?.from?.pathname])
 
     const guest_login = async () => {
         try {
-            const valid = await instanceAxios.get(`/authentication`, {
+            const valid = await axios.get(`/authentication`, {
                 headers: {
                     Accept: "application/json",
                     Authorization: `Bearer ${import.meta.env.VITE_API_KEY_READ}`
@@ -145,7 +146,7 @@ const AuthProvider = ({ children }) => {
 
     const login = async () => {
         try {
-            const valid = await instanceAxios.get(`/authentication`, {
+            const valid = await axios.get(`/authentication`, {
                 headers: {
                     Accept: "application/json",
                     Authorization: `Bearer ${import.meta.env.VITE_API_KEY_READ}`
@@ -171,10 +172,13 @@ const AuthProvider = ({ children }) => {
     }
 
     const getConfig = async () => {
-        return await instanceAxios.get(`/configuration`, {
+        return await axios.get(`/configuration`, {
             headers: {
                 Accept: "application/json",
                 Authorization: `Bearer ${import.meta.env.VITE_API_KEY_READ}`
+            },
+            params: {
+                api_key: import.meta.env.VITE_API_KEY
             }
         });
     }

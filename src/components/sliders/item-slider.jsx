@@ -6,8 +6,8 @@ import 'swiper/css';
 import 'swiper/css/pagination';
 import {use, useContext, useRef} from "react";
 import {AuthContext} from "../authentication/index.jsx";
-import {SwiperButton} from "./main-slider.jsx";
 import PosterItem from "../posters/poster-item.jsx";
+import {SwiperButton} from "./swiper-button.jsx";
 
 
 const useAuth = () => {
@@ -53,10 +53,6 @@ const ItemSlider = ({listType, posterType, options, headline, itemsPromise, size
                 slidesPerView={5}
                 spaceBetween={40}
                 modules={[Navigation, Pagination]}
-                navigation={{
-                    nextEl: '.swiper-button-next',
-                    prevEl: '.swiper-button-prev',
-                }}
                 pagination={{
                     el: ".swiper-pagination", // Use a valid DOM element here
                     type: "fraction",
