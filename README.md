@@ -15,4 +15,4 @@ Currently, two official plugins are available:
     ```
 2. Create new `.env` files in root project directory then copy all the variables from `.env.example` to new `.env` file created.
 3. Don't forget to fill the requirement value in `.env` file on those variables!
-3. Start the app by run `npm run dev` & enjoy browsing! 
+4. Start the app by run `npm run dev` & enjoy browsing! 
