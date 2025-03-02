@@ -14,15 +14,13 @@ const ProtectedRoute = ({ children }) => {
     const isMounted = useRef(false);
 
     useEffect(() => {
-        let isSubscribed = true;
-
         // To let it not run twice when initialized: https://www.reddit.com/r/reactjs/comments/15s1p0q/comment/jwbsd7x/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button
         if (!isMounted.current) {
             const getConfigurations = async () => {
                 let config = await getConfig();
 
                 if(searchParams.size > 0 && searchParams.has("approved") && JSON.parse(searchParams.get("approved"))) {
-                    if(isSubscribed) {
+                    if(!token) {
                         setRequestToken(searchParams.get("request_token"));
                     }
                     if(!session){
@@ -30,8 +28,7 @@ const ProtectedRoute = ({ children }) => {
                     }
                 }
 
-                // Set once when not subscribed
-                if(!isSubscribed) {
+                if(!configs) {
                     setConfig(config);
                 }
             }
@@ -44,9 +41,7 @@ const ProtectedRoute = ({ children }) => {
             // Set it to true to let the function execution above only run once
             isMounted.current = true;
         }
-
-        return () => isSubscribed = false
-    },[])
+    },[configs, token])
 
     if (session && expiresAt && !isNotExpired(expiresAt)) {
         setGuestExpiry(null);

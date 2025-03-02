@@ -128,5 +128,10 @@ export const getMovieUpcoming = async (page = 1,language = 'en-US') => {
             page,
             api_key: import.meta.env.VITE_API_KEY,
         }
-    }).then(res => res.data.results)
+    }).then(res => {
+        return {
+            data: res.data.results,
+            title: "Movie",
+        }
+    })
 }

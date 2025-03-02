@@ -5,6 +5,7 @@ import MovieDetailsOverview from "../generic/movie-details-overview.jsx";
 import {getImages, getListDetails, getDetail} from "../../utils";
 import {Suspense} from "react";
 import Skeleton from "react-loading-skeleton";
+import 'react-loading-skeleton/dist/skeleton.css'
 
 /**
  * Poster Item

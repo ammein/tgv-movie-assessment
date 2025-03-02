@@ -25,7 +25,7 @@ const useAuth = () => {
  * @returns {JSX.Element}
  * @constructor
  */
-const ItemSlider = ({listType, posterType, options, headline, itemsPromise, size}) => {
+const ItemSlider = ({listType, posterType, options, headline = "", itemsPromise, size}) => {
     const items = use(itemsPromise);
     const swiperRef = useRef(null);
 

@@ -3,6 +3,7 @@ import { AuthContext } from '../../components'
 import {getTrending, trendingType} from '../../utils/'
 import Logo from '../../assets/StreamVibeLogo.svg?react'
 import PosterAttractions from "../../components/posters/poster-attractions.jsx";
+import ErrorBoundary from "../../components/hoc/error-boundary.jsx";
 
 const useAuth = () => {
     return useContext(AuthContext);
@@ -30,10 +31,12 @@ function Home() {
         <div className="h-screen w-screen grid grid-rows-2 auto-rows-fr gap-5 overflow-hidden">
             <div className="z-10 fixed w-full h-1/10 bg-gradient-to-b from-black-08 to-black-08/0"></div>
             <div>
-                <Suspense fallback={null}>
-                    <PosterAttractions size={3} moviesPromise={getTrending(trendingType['MOVIES'])} peoplesPromise={getTrending(trendingType['PEOPLES'])}
-                                       tvPromise={getTrending(trendingType['TV'])}/>
-                </Suspense>
+                <ErrorBoundary modal>
+                    <Suspense fallback={null}>
+                        <PosterAttractions size={3} moviesPromise={getTrending(trendingType['MOVIES'])} peoplesPromise={getTrending(trendingType['PEOPLES'])}
+                                           tvPromise={getTrending(trendingType['TV'])}/>
+                    </Suspense>
+                </ErrorBoundary>
             </div>
             <div className="z-20 bottom-20 md:bottom-10 sm:bottom-5 fixed flex-col gap-[50px] justify-center items-center inline-flex">
                 <div className="h-fit lg:w-1/2 lg:py-0 lg:px-0 xs:px-2 md:w-full sm:w-full xs:w-full flex-col justify-center items-center gap-3.5 inline-flex">

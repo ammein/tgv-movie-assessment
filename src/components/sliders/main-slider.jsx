@@ -6,6 +6,7 @@ import 'swiper/css/pagination';
 import {use, useContext, useRef} from "react";
 import {AuthContext} from "../authentication/index.jsx";
 import Skeleton, {SkeletonTheme} from "react-loading-skeleton";
+import 'react-loading-skeleton/dist/skeleton.css'
 import {SwiperButton} from "./swiper-button.jsx";
 
 
