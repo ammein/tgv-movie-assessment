@@ -1,7 +1,7 @@
 import MainSlider, { SkeletonMainSlider } from "../../components/sliders/main-slider.jsx";
 import {getGenre, getTrending, trendingType, getMovieUpcoming} from '../../utils'
 import {Suspense} from "react";
-import Badge from "../../components/badge/badge.jsx";
+import Badge from "../../components/generic/badge.jsx";
 import ItemSlider from "../../components/sliders/item-slider.jsx";
 import ErrorBoundary from "../../components/hoc/error-boundary.jsx";
 

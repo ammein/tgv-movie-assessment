@@ -1,4 +1,4 @@
-import {useContext, Suspense, useEffect} from "react";
+import {useContext, Suspense, useEffect, useRef} from "react";
 import { AuthContext } from '../../components'
 import {getTrending, trendingType} from '../../utils/'
 import Logo from '../../assets/StreamVibeLogo.svg?react'
@@ -10,22 +10,25 @@ const useAuth = () => {
 };
 
 function Home() {
-
     const { onGuestLogin } = useAuth();
-
+    const isMounted = useRef(false);
     const { getConfig, configs, setConfig} = useAuth();
 
     useEffect(  () => {
-        async function getConfigurations() {
-            let config = await getConfig();
-            setConfig(config);
-        }
+        if(!isMounted.current){
+            async function getConfigurations() {
+                let config = await getConfig();
+                setConfig(config);
+            }
 
-        if (!configs) {
-            // noinspection JSIgnoredPromiseFromCall
-            getConfigurations();
+            if (!configs) {
+                getConfigurations()
+                    .catch(console.error);
+            }
+
+            isMounted.current = true;
         }
-    },[configs, getConfig, setConfig])
+    },[configs])
 
     return (
         <div className="h-screen w-screen grid grid-rows-2 auto-rows-fr gap-5 overflow-hidden">

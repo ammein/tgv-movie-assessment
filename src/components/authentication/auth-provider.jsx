@@ -3,7 +3,6 @@ import {useLocation, useNavigate} from "react-router";
 import { useLocalStorage } from "@uidotdev/usehooks";
 import {axios, isNotExpired} from '../../utils/'
 
-// eslint-disable-next-line react-refresh/only-export-components
 export const AuthContext = createContext({
     session: null,
     expiresAt: null,
