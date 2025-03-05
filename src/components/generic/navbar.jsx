@@ -2,13 +2,14 @@ import {NavLink, useLocation} from "react-router";
 import Logo from '../../assets/logo.svg?react'
 import {useContext} from "react";
 import {AuthContext} from "../authentication";
+import {getCookie} from "react-use-cookie";
 
 const useAuth = () => {
     return useContext(AuthContext);
 }
 
 const Navbar = ({ props }) => {
-    const { session, token, onLogin, onLogout } = useAuth();
+    const { onLogin, onLogout, loginType } = useAuth();
     const location = useLocation()
 
     return (
@@ -21,8 +22,8 @@ const Navbar = ({ props }) => {
             </div>
             <button
                 className="!h-fit !w-fit !px-6 !py-[18px] !bg-red-45 !rounded-lg !justify-start !items-center !gap-1 !inline-flex cursor-pointer"
-                onClick={() => session || token ? onLogout(!token) : onLogin()}>
-                <span className="text-absolute-white text-lg font-semibold font-manrope leading-[27px]">{session && !token ? "Logout as Guest" : token ? "Logout" : "Login"}</span>
+                onClick={() => getCookie('session_id') ? onLogout(getCookie('login') === "guest") : onLogin()}>
+                <span className="text-absolute-white text-lg font-semibold font-manrope leading-[27px]">{getCookie('login') === "guest" ? "Logout as Guest" : loginType === "user" ? "Logout" : "Login"}</span>
             </button>
         </nav>
     )

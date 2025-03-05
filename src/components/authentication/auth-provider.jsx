@@ -1,30 +1,24 @@
 import {createContext, useCallback, useState} from "react";
 import {useLocation, useNavigate} from "react-router";
-import { useLocalStorage } from "@uidotdev/usehooks";
-import {axios, isNotExpired} from '../../utils/'
+import useCookie from 'react-use-cookie';
+import {axios} from '../../utils/';
 
 export const AuthContext = createContext({
-    session: null,
-    expiresAt: null,
-    token: null,
     configs: null,
+    loginType: null,
     onGuestLogin: () => {},
     onLogin: () => {},
     onLogout: () => {},
     getConfig: () => {},
     setConfig: () => {},
-    setGuestExpiry: () => {},
-    setSession: () => {},
-    getSession: () => {},
-    setRequestToken: () => {},
+    getSession: () => {}
 });
 
 const AuthProvider = ({ children }) => {
-    const [guestExpiryDate, setGuestExpiryDate] = useLocalStorage("guest_expiry_date");
     const navigate = useNavigate();
     const location = useLocation();
-    const [sessionID, setSessionID] = useLocalStorage("session_id");
-    const [requestToken, setRequestToken] = useLocalStorage("request_token");
+    const [loginType, setLoginType, removeLoginType] = useCookie("login", null);
+    const [sessionID, setSessionID, removeSessionID] = useCookie("session_id", null);
     const [configs, setConfigs] = useState(null);
 
     const validate_guest_session = useCallback(async (valid) => {
@@ -39,8 +33,16 @@ const AuthProvider = ({ children }) => {
 
         if(!request.data.success) throw new Error("Invalid request for a session");
 
-        setSessionID(request.data.guest_session_id);
-        setGuestExpiryDate(request.data.expires_at);
+        let expiresInDays = Number(((new Date(request.data.expires_at).getTime() - new Date().getTime()) / (1000 * 3600 * 24)).toFixed(2))
+
+        setSessionID(request.data.guest_session_id, {
+            SameSite: 'strict',
+            days: expiresInDays,
+        });
+        setLoginType('guest', {
+            SameSite: 'strict',
+            days: expiresInDays,
+        });
 
         try{
             await navigate('/show');
@@ -65,7 +67,16 @@ const AuthProvider = ({ children }) => {
 
         if(!request.data.success) throw new Error("Invalid request for a session");
 
-        setSessionID(request.data.session_id);
+        setSessionID(request.data.session_id, {
+            Secure: true,
+            SameSite: 'strict',
+            days: 365,
+        });
+        setLoginType("user", {
+            Secure: true,
+            SameSite: 'strict',
+            days: 365,
+        })
 
         navigate('/show');
     }, [])
@@ -74,9 +85,13 @@ const AuthProvider = ({ children }) => {
     const remove_session = useCallback(async (guest) => {
         if(guest){
             window.localStorage.clear();
-            setSessionID(null);
-            setRequestToken(null);
-            setGuestExpiryDate(null);
+            removeSessionID();
+            removeLoginType();
+            try{
+                await navigate('/');
+            }catch{
+                throw new Error("Unable to navigate to home page");
+            }
         } else {
             const request = await axios.delete(`/authentication/session`, {
                 headers: {
@@ -95,9 +110,8 @@ const AuthProvider = ({ children }) => {
             if(!request.data.success) throw new Error("Unable to delete the session");
 
             window.localStorage.clear();
-            setSessionID(null);
-            setRequestToken(null);
-            setGuestExpiryDate(null);
+            removeSessionID();
+            removeLoginType();
 
             try{
                 await navigate('/');
@@ -119,8 +133,6 @@ const AuthProvider = ({ children }) => {
 
         if(!request.data.success) throw new Error("Invalid request for a session");
 
-        setRequestToken(request.data.request_token);
-
         const origin = location.state?.from?.pathname && location.state?.from?.pathname !== '/' ? location.state?.from?.pathname : '/show';
 
         window.location.href = `https://www.themoviedb.org/authenticate/${request.data.request_token}?redirect_to=${window.location.origin + origin}`;
@@ -135,7 +147,8 @@ const AuthProvider = ({ children }) => {
                 }
             });
 
-            if(sessionID && isNotExpired(guestExpiryDate) || requestToken) return await navigate('/show');
+            if((loginType === "guest" && sessionID) ||
+                (loginType === "user" && sessionID)) return await navigate('/show');
 
             await validate_guest_session(valid);
         } catch (err) {
@@ -154,7 +167,7 @@ const AuthProvider = ({ children }) => {
 
             const origin = location.state?.from?.pathname !== '/' ? location.state?.from?.pathname : '/show';
 
-            if(sessionID) return await navigate(origin);
+            if(loginType === "user" && sessionID) return await navigate(origin);
 
             await get_request_token(valid);
         } catch (err) {
@@ -183,19 +196,14 @@ const AuthProvider = ({ children }) => {
     }
 
     const value = {
-        session: sessionID,
-        token: requestToken,
-        expiresAt: guestExpiryDate,
+        loginType: loginType,
         onGuestLogin: guest_login,
         onLogin: login,
         onLogout: logout,
         getConfig: getConfig,
         getSession: validate_session,
         setConfig: setConfigs,
-        configs: configs,
-        setGuestExpiry: setGuestExpiryDate,
-        setSession: setSessionID,
-        setRequestToken: setRequestToken,
+        configs: configs
     }
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

@@ -15,7 +15,6 @@
   "dependencies": {
     "@acab/reset.css": "^0.11.0",
     "@tailwindcss/vite": "^4.0.9",
-    "@uidotdev/usehooks": "^2.4.1",
     "axios": "^1.8.1",
     "axios-cache-interceptor": "^1.6.2",
     "react": "^19.0.0",
@@ -23,6 +22,7 @@
     "react-lazy-load-image-component": "^1.6.3",
     "react-loading-skeleton": "^3.5.0",
     "react-router": "^7.2.0",
+    "react-use-cookie": "^1.6.1",
     "swiper": "^11.2.4",
     "tailwindcss": "^4.0.9"
   },
